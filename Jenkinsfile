@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment{
-        INDEX_FILE = 'index.html'
-    }
-
     stages {
         stage('Build') {
             agent {
@@ -25,11 +21,19 @@ pipeline {
             }
         }
         stage('Test') {
-            echo 'Test stage'
-            sh '''
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                echo "Test stage"
                 test -f build/index.html && echo "File exists" || echo "File does not exist"
                 npm test
             '''
+            }
         }
     }
 }
